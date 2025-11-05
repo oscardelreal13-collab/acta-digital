@@ -46,6 +46,3 @@ if st.button("📂 Ver documentos registrados"):
 
 
 
-
-st.write("Timestamp:", time.time())
-st.write("Ejemplo JSON:", json.dumps({"ok": True, "msg": "listo"}))
