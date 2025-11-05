@@ -1,18 +1,7 @@
 import streamlit as st
-st.title("Acta Digital 🧾")
-st.write("Bienvenido a tu primera app con Streamlit.")
-import hashlib, time, json
-
-
-st.title("Acta Digital — Import Test")
-
-st.write("✅ Librerías importadas:")
-st.code("streamlit, hashlib, time, json")
-
-import streamlit as st
 import hashlib, time, json, os
 
-# --- Función para generar hash único ---
+# --- Función para generar hash SHA-256 ---
 def get_hash(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
@@ -20,7 +9,7 @@ def get_hash(text):
 def save_acta(texto, hash_result, timestamp):
     acta = {"texto": texto, "hash": hash_result, "fecha": timestamp}
 
-    # Si el archivo no existe, crear uno nuevo
+    # Si el archivo no existe, crearlo
     if not os.path.exists("actas.json"):
         with open("actas.json", "w") as f:
             json.dump([], f)
@@ -32,42 +21,45 @@ def save_acta(texto, hash_result, timestamp):
     # Añadir la nueva acta
     data.append(acta)
 
-    # Guardar de nuevo
+    # Guardar todo de nuevo
     with open("actas.json", "w") as f:
         json.dump(data, f, indent=4)
 
     return acta
 
-# --- Interfaz de la aplicación ---
+# --- Interfaz principal ---
 st.title("📜 Acta Digital con Hash SHA-256")
-st.write("Registra actas de forma segura generando una huella digital única.")
+st.write("Genera una huella digital única para tu texto y guárdalo como registro verificable.")
 
-# Entrada de texto del usuario
-input_text = st.text_area("✍️ Escribe el contenido del acta:")
+# Campo de texto para el contenido del acta
+texto = st.text_area("✍️ Escribe el contenido del acta:")
 
-# Botón principal
-if st.button("Generar y guardar acta"):
-    if input_text.strip():
-        hash_result = get_hash(input_text)
+# Botón para generar el hash
+if st.button("Generar Hash y Guardar Acta"):
+    if texto.strip():
+        hash_result = get_hash(texto)
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
 
-        acta_guardada = save_acta(input_text, hash_result, timestamp)
+        acta_guardada = save_acta(texto, hash_result, timestamp)
 
         st.success("✅ Acta registrada correctamente.")
-        st.subheader("🧾 Detalles del registro:")
+        st.subheader("🧾 Detalles del acta:")
         st.json(acta_guardada)
     else:
-        st.warning("Por favor, escribe algo antes de generar el hash.")
+        st.warning("Por favor, escribe algún texto antes de generar el hash.")
 
-# --- Visualizar actas guardadas ---
-if st.button("📂 Ver todas las actas guardadas"):
+# Botón para ver todas las actas guardadas
+if st.button("📂 Ver todas las actas registradas"):
     if os.path.exists("actas.json"):
         with open("actas.json", "r") as f:
             data = json.load(f)
         st.write(f"Se han encontrado {len(data)} actas registradas:")
         st.json(data)
     else:
-        st.info("Aún no hay actas registradas.")
+        st.info("Aún no hay actas guardadas.")
+
+
+
 
 st.write("Timestamp:", time.time())
 st.write("Ejemplo JSON:", json.dumps({"ok": True, "msg": "listo"}))
