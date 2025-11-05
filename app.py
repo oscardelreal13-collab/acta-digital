@@ -5,58 +5,44 @@ import hashlib, time, json, os
 def get_hash(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
-# --- Función para guardar el acta en un archivo JSON ---
-def save_acta(texto, hash_result, timestamp):
-    acta = {"texto": texto, "hash": hash_result, "fecha": timestamp}
-
-    # Si el archivo no existe, crearlo
-    if not os.path.exists("actas.json"):
-        with open("actas.json", "w") as f:
-            json.dump([], f)
-
-    # Cargar las actas existentes
-    with open("actas.json", "r") as f:
-        data = json.load(f)
-
-    # Añadir la nueva acta
-    data.append(acta)
-
-    # Guardar todo de nuevo
-    with open("actas.json", "w") as f:
-        json.dump(data, f, indent=4)
-
-    return acta
-
 # --- Interfaz principal ---
-st.title("📜 Acta Digital con Hash SHA-256")
-st.write("Genera una huella digital única para tu texto y guárdalo como registro verificable.")
+st.title("📜 Registro de Documentos Digitales")
+st.write("Simulación de un registro tipo *blockchain* para documentos o actas digitales.")
 
-# Campo de texto para el contenido del acta
-texto = st.text_area("✍️ Escribe el contenido del acta:")
+# --- Campos de entrada ---
+owner = st.text_input("👤 Propietario del documento:")
+content = st.text_area("📝 Contenido del documento:")
 
-# Botón para generar el hash
-if st.button("Generar Hash y Guardar Acta"):
-    if texto.strip():
-        hash_result = get_hash(texto)
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+# --- Botón para registrar el documento ---
+if st.button("Registrar Documento"):
+    if owner.strip() and content.strip():
+        # Crear el registro
+        record = {
+            "owner": owner,
+            "hash": get_hash(content),
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
-        acta_guardada = save_acta(texto, hash_result, timestamp)
+        # Guardar cada registro en una línea independiente (simulando blockchain)
+        with open("blockchain.json", "a") as f:
+            f.write(json.dumps(record) + "\n")
 
-        st.success("✅ Acta registrada correctamente.")
-        st.subheader("🧾 Detalles del acta:")
-        st.json(acta_guardada)
+        st.success("✅ Documento registrado con éxito.")
+        st.subheader("🔒 Detalles del registro:")
+        st.json(record)
     else:
-        st.warning("Por favor, escribe algún texto antes de generar el hash.")
+        st.warning("Por favor, completa todos los campos antes de registrar.")
 
-# Botón para ver todas las actas guardadas
-if st.button("📂 Ver todas las actas registradas"):
-    if os.path.exists("actas.json"):
-        with open("actas.json", "r") as f:
-            data = json.load(f)
-        st.write(f"Se han encontrado {len(data)} actas registradas:")
+# --- Mostrar todos los documentos registrados ---
+if st.button("📂 Ver documentos registrados"):
+    if os.path.exists("blockchain.json") and os.path.getsize("blockchain.json") > 0:
+        with open("blockchain.json", "r") as f:
+            lines = f.readlines()
+            data = [json.loads(line) for line in lines]
+        st.write(f"Se han encontrado {len(data)} documentos registrados:")
         st.json(data)
     else:
-        st.info("Aún no hay actas guardadas.")
+        st.info("Aún no hay documentos registrados en la blockchain.")
 
 
 
